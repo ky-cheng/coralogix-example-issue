@@ -1,0 +1,50 @@
+service: helloworld-sample-sls
+frameworkVersion: "3.18.2"
+useDotenv: true
+configValidationMode: error
+provider:
+  name: aws
+  versionFunctions: false
+  runtime: nodejs16.x
+  region: ap-southeast-2
+  stage: dev
+  timeout: 15
+  logRetentionInDays: 14
+  tracing:
+    apiGateway: true
+    lambda: true
+  logs:
+    httpApi: true
+    restApi: true
+  # you can define service wide environment variables here
+  environment:
+    # Coralogix Environment Variables
+    AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+    CX_DOMAIN: cx498.coralogix.com
+    CX_PRIVATE_KEY: ${ssm:/coralogix/send-your-data-key}
+    CX_REPORTING_STRATEGY: REPORT_AFTER_INVOCATION
+    CX_TRACING_MODE: otel
+# Serverless plugins
+plugins:
+  - serverless-webpack
+# custom section
+custom:
+  webpack:
+    packager: 'yarn'
+    includeModules:
+      forceExclude:
+        - aws-sdk
+    packagerOptions:
+      scripts:
+        - rm -rf node_modules/aws-sdk
+
+functions:
+  helloWorld:
+    handler: handler.helloWorld
+    timeout: 30
+    layers:
+      - arn:aws:lambda:ap-southeast-2:625240141681:layer:coralogix-nodejs-wrapper-and-exporter-x86_64:3
+    events:
+      - http:
+          path: hello-world
+          method: get
