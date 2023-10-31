@@ -3,7 +3,7 @@ import doNotWaitForEmptyEventLoop from '@middy/do-not-wait-for-empty-event-loop'
 import httpErrorHandler from '@middy/http-error-handler';
 import httpHeaderNormalizer from '@middy/http-header-normalizer';
 
-export const helloWorldHandler = async (event: any) => {
+const helloWorldHandler = async (event: any) => {
   console.log(event);
   console.log('returning hello world!')
   return {
@@ -12,7 +12,9 @@ export const helloWorldHandler = async (event: any) => {
   };
 };
 
-export const helloWorld = middy(helloWorldHandler)
+const helloWorld = middy(helloWorldHandler)
   .use(doNotWaitForEmptyEventLoop())
   .use(httpHeaderNormalizer())
   .use(httpErrorHandler());
+
+  module.exports = { helloWorldHandler, helloWorld };
